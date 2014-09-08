@@ -41,7 +41,7 @@ from argparse import ArgumentParser, FileType
 from os.path import abspath, dirname, isfile, join as path_join
 from shutil import rmtree
 from struct import calcsize, pack, unpack
-from subprocess import Popen
+from subprocess import Popen, call
 from sys import stderr, stdin, stdout
 from tempfile import mkdtemp
 
@@ -100,6 +100,7 @@ def bh_tsne(samples, perplexity=DEFAULT_PERPLEXITY, theta=DEFAULT_THETA,
             # Then write the data
             for sample in samples:
                 data_file.write(pack('{}d'.format(len(sample)), *sample))
+            data_file.close()
 
         # Call bh_tsne and let it do its thing
         with open('/dev/null', 'w') as dev_null:
@@ -107,7 +108,11 @@ def bh_tsne(samples, perplexity=DEFAULT_PERPLEXITY, theta=DEFAULT_THETA,
                     # bh_tsne is very noisy on stdout, tell it to use stderr
                     #   if it is to print any output
                     stdout=stderr if verbose else dev_null)
+            # This prevents choking on outputs
+            output = bh_tsne_p.communicate()[0]
             bh_tsne_p.wait()
+            #bh_tsne_p = call([abspath(BH_TSNE_BIN_PATH)
+            print "return code: ".format(bh_tsne_p.returncode)
             assert not bh_tsne_p.returncode, ('ERROR: Call to bh_tsne exited '
                     'with a non-zero return code exit status, please ' +
                     ('enable verbose mode and ' if not verbose else '') +
