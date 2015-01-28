@@ -16,6 +16,7 @@
 #include "quadtree.h"
 #include "vptree.h"
 #include "tsne.h"
+#include <ctime>
 
 extern "C" {
     #include <cblas.h>
@@ -35,7 +36,7 @@ void TSNE::run(double* X, int N, int D, double* Y, int no_dims, double perplexit
     // Set learning parameters
     float total_time = .0;
     clock_t start, end;
-	int max_iter = 1000, stop_lying_iter = 250, mom_switch_iter = 250;
+	int max_iter = 5000, stop_lying_iter = 250, mom_switch_iter = 250;
 	double momentum = .5, final_momentum = .8;
 	double eta = 200.0;
     
@@ -818,6 +819,9 @@ int main() {
 	double perc_landmarks;
 	double perplexity, theta, *data;
     TSNE* tsne = new TSNE();
+
+	// JMH: Initialize the random seed (disable for repeatable runs)
+	srand(time(0));
     
     // Read the parameters and the dataset
 	if(tsne->load_data(&data, &origN, &D, &theta, &perplexity)) {
